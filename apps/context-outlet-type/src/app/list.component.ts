@@ -5,29 +5,51 @@ import {
   ContentChild,
   Input,
   TemplateRef,
+  ViewContainerRef,
 } from '@angular/core';
 
+import { Directive } from '@angular/core';
+
+interface ItemContext<T> {
+  $implicit: T;
+  index: number;
+}
+
+@Directive({
+  selector: 'ng-template[items]',
+  standalone: true,
+})
+export class ItemsDirective<T> {
+  @Input('items') list!: T[];
+
+  static ngTemplateContextGuard<TContext>(
+    dir: ItemsDirective<TContext>,
+    ctx: unknown
+  ): ctx is ItemContext<TContext> {
+    return true;
+  }
+}
 @Component({
   selector: 'list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ItemsDirective],
   template: `
-    <div *ngFor="let item of list; index as i">
+    <div *ngFor="let item of list; let index = index">
       <ng-container
         *ngTemplateOutlet="
-          listTemplateRef || emptyRef;
-          context: { $implicit: item, appList: item, index: i }
-        ">
-      </ng-container>
+          itemsDirective;
+          context: { $implicit: item, index }
+        "></ng-container>
     </div>
-
-    <ng-template #emptyRef> No Template </ng-template>
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styles: [],
 })
 export class ListComponent<TItem extends object> {
+  constructor(private viewContainerRef: ViewContainerRef) {}
+
   @Input() list!: TItem[];
 
-  @ContentChild('listRef', { read: TemplateRef })
-  listTemplateRef!: TemplateRef<TItem[]>;
+  @ContentChild(ItemsDirective, { read: TemplateRef })
+  itemsDirective!: TemplateRef<TItem>;
 }

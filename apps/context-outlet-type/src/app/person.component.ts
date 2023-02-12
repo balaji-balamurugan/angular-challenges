@@ -5,6 +5,22 @@ interface Person {
   name: string;
   age: number;
 }
+interface PersonContext {
+  $implicit: string;
+  age: number;
+}
+
+import { Directive } from '@angular/core';
+
+@Directive({ selector: 'ng-template[person-list]', standalone: true })
+export class PersonListDirective {
+  static ngTemplateContextGuard(
+    dir: PersonListDirective,
+    ctx: unknown
+  ): ctx is PersonContext {
+    return true;
+  }
+}
 
 @Component({
   standalone: true,
@@ -23,6 +39,6 @@ interface Person {
 export class PersonComponent {
   @Input() person!: Person;
 
-  @ContentChild('#personRef', { read: TemplateRef })
+  @ContentChild(PersonListDirective, { read: TemplateRef })
   personTemplateRef!: TemplateRef<unknown>;
 }

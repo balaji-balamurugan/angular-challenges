@@ -5,7 +5,6 @@ import {
   ContentChild,
   Input,
   TemplateRef,
-  ViewContainerRef,
 } from '@angular/core';
 
 import { Directive } from '@angular/core';
@@ -46,8 +45,6 @@ export class ItemsDirective<T> {
   styles: [],
 })
 export class ListComponent<TItem extends object> {
-  constructor(private viewContainerRef: ViewContainerRef) {}
-
   @Input() list!: TItem[];
 
   @ContentChild(ItemsDirective, { read: TemplateRef })
